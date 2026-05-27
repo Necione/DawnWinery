@@ -29,7 +29,6 @@ const SECTION_NAMES = [
 const SECTION_EXIT_MS = 280;
 const SECTION_ENTER_MS = 380;
 
-const APPLICATION_MIN_LEVEL = 5;
 const APPLICATION_MIN_REPUTATION = 40;
 
 type ApplicationRequirement = {
@@ -41,13 +40,6 @@ type ApplicationRequirement = {
 function getApplicationRequirements(
   serverStats: ServerUserStats,
 ): ApplicationRequirement[] {
-  const levelMet =
-    serverStats?.found === true
-      ? serverStats.level >= APPLICATION_MIN_LEVEL
-      : serverStats?.found === false
-        ? false
-        : null;
-
   const reputationMet =
     serverStats?.found === true
       ? serverStats.reputation >= APPLICATION_MIN_REPUTATION
@@ -56,11 +48,6 @@ function getApplicationRequirements(
         : null;
 
   return [
-    {
-      id: "level",
-      label: `Level ${APPLICATION_MIN_LEVEL}`,
-      met: levelMet,
-    },
     {
       id: "reputation",
       label: `${APPLICATION_MIN_REPUTATION}+ Reputation`,
