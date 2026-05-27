@@ -7,9 +7,10 @@ import {
   signDiscordIdentity,
 } from "@/lib/discord-auth";
 import { getCookieOptions, getDiscordConfig } from "@/lib/discord";
+import { getRequestOrigin } from "@/lib/request-origin";
 
 function redirectWithError(request: NextRequest, reason: string) {
-  const url = new URL("/applications", request.nextUrl.origin);
+  const url = new URL("/applications", getRequestOrigin(request));
   url.searchParams.set("discord", "error");
   url.searchParams.set("reason", reason);
   return NextResponse.redirect(url);
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
     return redirectWithError(request, "state");
   }
 
-  const redirectUri = `${request.nextUrl.origin}/api/auth/discord/callback`;
+  const redirectUri = `${getRequestOrigin(request)}/api/auth/discord/callback`;
   const user = await exchangeDiscordCode(
     code,
     redirectUri,
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
 
   const signedIdentity = signDiscordIdentity(user, config.clientSecret);
   const response = NextResponse.redirect(
-    new URL(returnTo, request.nextUrl.origin),
+    new URL(returnTo, getRequestOrigin(request)),
   );
 
   response.cookies.set(

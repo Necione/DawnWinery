@@ -5,6 +5,7 @@ import {
   DISCORD_OAUTH_STATE_COOKIE,
 } from "@/lib/discord-auth";
 import { getCookieOptions, getDiscordConfig } from "@/lib/discord";
+import { getRequestOrigin } from "@/lib/request-origin";
 
 export async function GET(request: NextRequest) {
   const config = getDiscordConfig();
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
   const returnTo =
     request.nextUrl.searchParams.get("returnTo") ?? "/applications";
   const state = crypto.randomBytes(16).toString("hex");
-  const redirectUri = `${request.nextUrl.origin}/api/auth/discord/callback`;
+  const redirectUri = `${getRequestOrigin(request)}/api/auth/discord/callback`;
 
   const authorizeUrl = new URL("https://discord.com/api/oauth2/authorize");
   authorizeUrl.searchParams.set("client_id", config.clientId);
