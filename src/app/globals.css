@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+:root {
+  --discord-bg: #313338;
+  --discord-card: #2b2d31;
+  --discord-input: #1e1f22;
+  --discord-input-border: #111214;
+  --discord-blurple: #5865f2;
+  --discord-blurple-hover: #4752c4;
+  --discord-text: #f2f3f5;
+  --discord-muted: #b5bac1;
+}
+
+body {
+  background: var(--discord-bg);
+  color: var(--discord-text);
+  font-family: "gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+@media (min-width: 640px) {
+  html,
+  body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes banner-reveal {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes icon-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes section-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+@keyframes section-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-banner {
+  animation: banner-reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-icon-pop {
+  animation: icon-pop 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) 0.15s both;
+}
+
+.animate-section-out {
+  animation: section-out 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-section-in {
+  animation: section-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-delay-1 {
+  animation-delay: 0.2s;
+}
+
+.animate-delay-2 {
+  animation-delay: 0.32s;
+}
+
+.animate-delay-3 {
+  animation-delay: 0.44s;
+}
+
+.animate-delay-4 {
+  animation-delay: 0.56s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-fade-in,
+  .animate-banner,
+  .animate-icon-pop,
+  .animate-section-out,
+  .animate-section-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+}

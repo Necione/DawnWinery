@@ -1,0 +1,71 @@
+[
+  {
+    "id": "reportable-games",
+    "section": 2,
+    "type": "checkbox",
+    "label": "What games can you report news for?",
+    "required": true,
+    "options": [
+      "Genshin Impact",
+      "Honkai: Star Rail",
+      "Zenless Zone Zero",
+      "Wuthering Waves",
+      "Neverness to Everness"
+    ]
+  },
+  {
+    "id": "timezone",
+    "section": 2,
+    "type": "text",
+    "label": "What is your timezone?",
+    "placeholder": "e.g. EST (UTC-5) or Singapore",
+    "required": true
+  },
+  {
+    "id": "other-server-staff",
+    "section": 2,
+    "type": "radio",
+    "label": "Are you staff in any other servers?",
+    "required": true,
+    "options": ["Yes", "No"]
+  },
+  {
+    "id": "other-server-staff-list",
+    "section": 2,
+    "type": "textarea",
+    "label": "Please list the servers",
+    "placeholder": "e.g. discord.gg/liyue",
+    "required": true,
+    "rows": 3,
+    "showWhen": {
+      "field": "other-server-staff",
+      "value": "Yes"
+    }
+  },
+  {
+    "id": "game-uids",
+    "section": 3,
+    "type": "textarea",
+    "label": "What are your UIDs for any games?",
+    "placeholder": "e.g. Genshin Impact: 123456789, Honkai: Star Rail: 987654321",
+    "required": true,
+    "rows": 3
+  },
+  {
+    "id": "fit-reason",
+    "section": 3,
+    "type": "textarea",
+    "label": "Why do you think you're a good fit?",
+    "placeholder": "Tell us about your experience and why you'd be a great fit for the News Committee...",
+    "required": true,
+    "rows": 5
+  },
+  {
+    "id": "favorite-late-night-snack",
+    "section": 3,
+    "type": "text",
+    "label": "What's your favorite late night snack?",
+    "placeholder": "e.g. instant ramen, chips, ice cream",
+    "required": true
+  }
+]
