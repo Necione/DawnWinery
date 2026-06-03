@@ -41,11 +41,6 @@ export default function JoinServerButton() {
     if (isPending) return;
     setIsPending(true);
 
-    // Open a blank tab *synchronously* during the click so the browser's
-    // popup blocker is satisfied. We'll point it at the real invite URL
-    // once we have it.
-    const newTab = window.open("about:blank", "_blank", "noopener,noreferrer");
-
     const fbclid =
       new URLSearchParams(window.location.search).get("fbclid") ?? null;
     const fbp = readCookie("_fbp");
@@ -88,12 +83,7 @@ export default function JoinServerButton() {
       );
     }
 
-    if (newTab && !newTab.closed) {
-      newTab.location.href = inviteUrl;
-    } else {
-      // Popup was blocked — navigate the current tab as a last resort.
-      window.location.href = inviteUrl;
-    }
+    window.location.href = inviteUrl;
 
     setIsPending(false);
   }
@@ -101,8 +91,6 @@ export default function JoinServerButton() {
   return (
     <a
       href={FALLBACK_INVITE_URL}
-      target="_blank"
-      rel="noopener noreferrer"
       onClick={handleClick}
       aria-busy={isPending}
       className="animate-fade-in-up animate-delay-4 block w-full rounded-md bg-[var(--discord-blurple)] py-2.5 text-center text-sm font-medium text-white transition-[background-color,transform,box-shadow] duration-200 hover:bg-[var(--discord-blurple-hover)] hover:shadow-[0_4px_20px_rgba(88,101,242,0.35)] active:scale-[0.98] aria-busy:opacity-80"

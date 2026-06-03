@@ -29,16 +29,14 @@ export default function Home() {
         </div>
 
         <div className="px-5 pb-5 pt-12">
-          <h1 className="animate-fade-in-up animate-delay-1 mb-0.5 text-xl font-semibold text-[var(--discord-text)]">
+          <h1 className="animate-fade-in-up animate-delay-1 mb-4 text-xl font-semibold text-[var(--discord-text)]">
             Dawn Winery
           </h1>
-          <p className="animate-fade-in-up animate-delay-2 mb-4 text-sm text-[var(--discord-muted)]">
-            discord.gg/E6CtJj9sum
-          </p>
 
-          <p className="animate-fade-in-up animate-delay-3 mb-6 text-sm leading-relaxed text-[var(--discord-muted)]">
-            Hyperactive server with big weekly giveaways &amp; events. Earn free
-            stuff just by being active. Custom economy, poker, minigames + more.
+          <p className="animate-fade-in-up animate-delay-2 mb-6 text-sm leading-relaxed text-[var(--discord-muted)]">
+            🍷 earn FREE stuff just by being active. hyperactive server with
+            weekly giveaways &amp; events, custom economy, poker, minigames +
+            more &gt;⩊&lt;.ᐟ
           </p>
 
           <JoinServerButton />
