@@ -1,8 +1,7 @@
 import Image from "next/image";
 import banner from "../../assets/banner.jpg";
 import icon from "../../assets/icon.webp";
-
-const DISCORD_INVITE_URL = "https://discord.gg/dawnwinery";
+import JoinServerButton from "./JoinServerButton";
 
 export default function Home() {
   return (
@@ -34,7 +33,7 @@ export default function Home() {
             Dawn Winery
           </h1>
           <p className="animate-fade-in-up animate-delay-2 mb-4 text-sm text-[var(--discord-muted)]">
-            discord.gg/dawnwinery
+            discord.gg/E6CtJj9sum
           </p>
 
           <p className="animate-fade-in-up animate-delay-3 mb-6 text-sm leading-relaxed text-[var(--discord-muted)]">
@@ -42,14 +41,7 @@ export default function Home() {
             stuff just by being active. Custom economy, poker, minigames + more.
           </p>
 
-          <a
-            href={DISCORD_INVITE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="animate-fade-in-up animate-delay-4 block w-full rounded-md bg-[var(--discord-blurple)] py-2.5 text-center text-sm font-medium text-white transition-[background-color,transform,box-shadow] duration-200 hover:bg-[var(--discord-blurple-hover)] hover:shadow-[0_4px_20px_rgba(88,101,242,0.35)] active:scale-[0.98]"
-          >
-            Join Server
-          </a>
+          <JoinServerButton />
         </div>
       </div>
     </main>
