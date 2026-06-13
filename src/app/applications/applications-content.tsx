@@ -26,8 +26,8 @@ export function ApplicationsContent({
     <>
       {!submitted ? (
         <p className="animate-fade-in-up animate-delay-3 mb-6 text-sm leading-relaxed text-[var(--discord-muted)]">
-          We&apos;re looking for members in our News Committee! Help report HoYo
-          content, codes, updates and more.
+          We&apos;re looking for new Council members! Help shape our community
+          and support members across the server.
         </p>
       ) : null}
       <ApplicationForm

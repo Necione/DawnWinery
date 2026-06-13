@@ -9,8 +9,8 @@ import { getUserStatsByDiscordId } from "@/lib/mongodb";
 import { ApplicationsContent } from "./applications-content";
 
 export const metadata: Metadata = {
-  title: "News Committee Application | Dawn Winery",
-  description: "Apply to join the News Committee at Dawn Winery",
+  title: "Council Application | Dawn Winery",
+  description: "Apply to join the Council at Dawn Winery",
 };
 
 const DISCORD_ERROR_MESSAGES: Record<string, string> = {
@@ -63,7 +63,7 @@ export default async function ApplicationsPage({
 
         <div className="px-5 pb-5 pt-12">
           <h1 className="animate-fade-in-up animate-delay-1 mb-0.5 text-xl font-semibold text-[var(--discord-text)]">
-            News Committee Application
+            Council Application
           </h1>
           <p className="animate-fade-in-up animate-delay-2 mb-6 text-sm text-[var(--discord-muted)]">
             Dawn Winery

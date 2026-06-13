@@ -17,14 +17,16 @@ import {
   getDiscordDisplayName,
 } from "@/lib/discord";
 
-type FormSection = 1 | 2 | 3;
+type FormSection = 1 | 2 | 3 | 4 | 5;
 type SectionTransition = "idle" | "exit" | "enter";
 
-const TOTAL_SECTIONS = 3;
+const TOTAL_SECTIONS = 5;
 const SECTION_NAMES = [
   "Discord Account",
-  "Background Info",
-  "Why You're a Good Fit",
+  "Background",
+  "Questions",
+  "General",
+  "Personality",
 ] as const;
 const SECTION_EXIT_MS = 280;
 const SECTION_ENTER_MS = 380;
@@ -144,7 +146,7 @@ function RequirementsSection({ serverStats }: { serverStats: ServerUserStats }) 
 }
 
 function isSectionComplete(
-  sectionNumber: 2 | 3,
+  sectionNumber: 2 | 3 | 4 | 5,
   answers: Record<string, AnswerValue>,
 ): boolean {
   return questions
@@ -188,8 +190,8 @@ function SectionProgressBar({
   transition: SectionTransition;
 }) {
   const nextSectionName =
-    currentSection === 1 || currentSection === 2
-      ? SECTION_NAMES[currentSection]
+    currentSection < TOTAL_SECTIONS
+      ? SECTION_NAMES[currentSection as 1 | 2 | 3 | 4]
       : null;
 
   const animationClass =
@@ -355,6 +357,58 @@ function QuestionField({
               );
             })}
           </fieldset>
+        </>
+      ) : question.type === "slider" ? (
+        <>
+          <QuestionLabel htmlFor={question.id} required={question.required}>
+            {question.label}
+          </QuestionLabel>
+          <div className="rounded-md border border-[var(--discord-input-border)] bg-[var(--discord-input)] px-3 py-3">
+            <div className="flex items-center gap-3">
+              <span className="w-4 shrink-0 text-center text-xs font-medium text-[var(--discord-muted)]">
+                {question.min ?? 1}
+              </span>
+              <input
+                id={question.id}
+                name={question.id}
+                type="range"
+                min={question.min ?? 1}
+                max={question.max ?? 10}
+                step={1}
+                value={
+                  typeof answers[question.id] === "string" &&
+                  answers[question.id].length > 0
+                    ? answers[question.id]
+                    : String(
+                        Math.round(
+                          ((question.min ?? 1) + (question.max ?? 10)) / 2,
+                        ),
+                      )
+                }
+                onChange={(event) =>
+                  onAnswerChange(question.id, event.target.value)
+                }
+                className="h-2 w-full cursor-pointer appearance-none rounded-full bg-[var(--discord-bg)] accent-[var(--discord-blurple)]"
+              />
+              <span className="w-4 shrink-0 text-center text-xs font-medium text-[var(--discord-muted)]">
+                {question.max ?? 10}
+              </span>
+            </div>
+            <p className="mt-2 text-center text-sm font-semibold text-[var(--discord-text)]">
+              {typeof answers[question.id] === "string" &&
+              answers[question.id].length > 0
+                ? answers[question.id]
+                : String(
+                    Math.round(
+                      ((question.min ?? 1) + (question.max ?? 10)) / 2,
+                    ),
+                  )}
+              <span className="font-normal text-[var(--discord-muted)]">
+                {" "}
+                / {question.max ?? 10}
+              </span>
+            </p>
+          </div>
         </>
       ) : (
         <>
@@ -624,10 +678,19 @@ export function ApplicationForm({
   const [transition, setTransition] = useState<SectionTransition>("idle");
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>(() =>
     Object.fromEntries(
-      questions.map((question) => [
-        question.id,
-        question.type === "checkbox" ? [] : "",
-      ]),
+      questions.map((question) => {
+        if (question.type === "checkbox") {
+          return [question.id, []];
+        }
+
+        if (question.type === "slider") {
+          const min = question.min ?? 1;
+          const max = question.max ?? 10;
+          return [question.id, String(Math.round((min + max) / 2))];
+        }
+
+        return [question.id, ""];
+      }),
     ),
   );
   const [submitted, setSubmitted] = useState(false);
@@ -635,14 +698,21 @@ export function ApplicationForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const requiredQuestionsFilled =
-    isSectionComplete(2, answers) && isSectionComplete(3, answers);
+    isSectionComplete(2, answers) &&
+    isSectionComplete(3, answers) &&
+    isSectionComplete(4, answers) &&
+    isSectionComplete(5, answers);
 
   const canAdvanceSection =
     section === 1
       ? Boolean(discordUser)
       : section === 2
         ? isSectionComplete(2, answers)
-        : false;
+        : section === 3
+          ? isSectionComplete(3, answers)
+          : section === 4
+            ? isSectionComplete(4, answers)
+            : false;
 
   function handleAnswerChange(id: string, value: string) {
     setAnswers((prev) => {

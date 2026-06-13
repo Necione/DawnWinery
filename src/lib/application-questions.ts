@@ -2,13 +2,15 @@ import applicationQuestions from "@/config/application-questions.json";
 
 export type ApplicationQuestion = {
   id: string;
-  section: 2 | 3;
-  type?: "text" | "textarea" | "checkbox" | "radio";
+  section: 2 | 3 | 4 | 5;
+  type?: "text" | "textarea" | "checkbox" | "radio" | "slider";
   label: string;
   placeholder?: string;
   required: boolean;
   rows?: number;
   options?: string[];
+  min?: number;
+  max?: number;
   showWhen?: {
     field: string;
     value: string;
@@ -36,6 +38,18 @@ export function isQuestionFilled(
 ): boolean {
   if (question.type === "checkbox") {
     return Array.isArray(value) && value.length > 0;
+  }
+
+  if (question.type === "slider") {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      return false;
+    }
+
+    const numericValue = Number(value);
+    const min = question.min ?? 1;
+    const max = question.max ?? 10;
+
+    return Number.isFinite(numericValue) && numericValue >= min && numericValue <= max;
   }
 
   return typeof value === "string" && value.trim().length > 0;

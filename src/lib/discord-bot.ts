@@ -220,7 +220,7 @@ export async function postApplicationToDiscord({
   const displayName = getDiscordDisplayName(user);
   const announcementEmbed: DiscordEmbed = {
     title: "New Application Submitted",
-    description: `${displayName} submitted a News Committee application.`,
+    description: `${displayName} submitted a Council application.`,
     color: DISCORD_BLURPLE,
     author: {
       name: displayName,
@@ -228,7 +228,7 @@ export async function postApplicationToDiscord({
     },
     fields: buildApplicantFields(user, serverStats),
     footer: {
-      text: "News Committee Applications",
+      text: "Council Applications",
     },
     timestamp: new Date().toISOString(),
   };
@@ -238,7 +238,7 @@ export async function postApplicationToDiscord({
     {
       method: "POST",
       body: JSON.stringify({
-        content: "📋 **New News Committee application received**",
+        content: "📋 **New Council application received**",
         embeds: [announcementEmbed],
       }),
     },

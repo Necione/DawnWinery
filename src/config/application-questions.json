@@ -1,19 +1,5 @@
 [
   {
-    "id": "reportable-games",
-    "section": 2,
-    "type": "checkbox",
-    "label": "What games can you report news for?",
-    "required": true,
-    "options": [
-      "Genshin Impact",
-      "Honkai: Star Rail",
-      "Zenless Zone Zero",
-      "Wuthering Waves",
-      "Neverness to Everness"
-    ]
-  },
-  {
     "id": "timezone",
     "section": 2,
     "type": "text",
@@ -22,19 +8,54 @@
     "required": true
   },
   {
-    "id": "other-server-staff",
+    "id": "age",
     "section": 2,
+    "type": "text",
+    "label": "How old are you currently?",
+    "placeholder": "e.g. 18",
+    "required": true
+  },
+  {
+    "id": "discord-activity",
+    "section": 2,
+    "type": "slider",
+    "label": "How active are you on Discord (not necessarily in our server)?",
+    "required": true,
+    "min": 1,
+    "max": 10
+  },
+  {
+    "id": "server-knowledge",
+    "section": 3,
+    "type": "textarea",
+    "label": "How well do you know the server? (i.e. the commands, systems, etc).",
+    "placeholder": "Tell us about your familiarity with our server...",
+    "required": true,
+    "rows": 4
+  },
+  {
+    "id": "staff-reason",
+    "section": 3,
+    "type": "textarea",
+    "label": "Why do you want to be a staff member in our server?",
+    "placeholder": "Tell us why you want to join the team...",
+    "required": true,
+    "rows": 5
+  },
+  {
+    "id": "other-server-staff",
+    "section": 3,
     "type": "radio",
-    "label": "Are you staff in any other servers?",
+    "label": "Have you been staff in other servers before?",
     "required": true,
     "options": ["Yes", "No"]
   },
   {
     "id": "other-server-staff-list",
-    "section": 2,
+    "section": 3,
     "type": "textarea",
     "label": "Please list the servers",
-    "placeholder": "e.g. discord.gg/liyue",
+    "placeholder": "e.g. discord.gg/example",
     "required": true,
     "rows": 3,
     "showWhen": {
@@ -43,29 +64,101 @@
     }
   },
   {
-    "id": "game-uids",
+    "id": "pass-confidence",
     "section": 3,
     "type": "textarea",
-    "label": "What are your UIDs for any games?",
-    "placeholder": "e.g. Genshin Impact: 123456789, Honkai: Star Rail: 987654321",
+    "label": "Do you think you'll pass? Why?",
+    "placeholder": "Share your honest thoughts...",
     "required": true,
-    "rows": 3
+    "rows": 4
   },
   {
-    "id": "fit-reason",
-    "section": 3,
+    "id": "compliment-qualities",
+    "section": 4,
     "type": "textarea",
-    "label": "Why do you think you're a good fit?",
-    "placeholder": "Tell us about your experience and why you'd be a great fit for the News Committee...",
+    "label": "What are some qualities you get the most compliments about and why?",
+    "placeholder": "What do people often praise you for?",
+    "required": true,
+    "rows": 4
+  },
+  {
+    "id": "area-to-improve",
+    "section": 4,
+    "type": "textarea",
+    "label": "What's one area in life you believe you need to work on?",
+    "placeholder": "Be honest — we're not looking for perfection...",
+    "required": true,
+    "rows": 4
+  },
+  {
+    "id": "comfort-food",
+    "section": 4,
+    "type": "text",
+    "label": "What is your comfort food?",
+    "placeholder": "e.g. mac and cheese, ramen, pizza",
+    "required": true
+  },
+  {
+    "id": "hierarchy-thoughts",
+    "section": 5,
+    "type": "textarea",
+    "label": "What are your thoughts about hierarchies?",
+    "placeholder": "Share your perspective...",
+    "required": true,
+    "rows": 4
+  },
+  {
+    "id": "white-lie",
+    "section": 5,
+    "type": "textarea",
+    "label": "Would you blatantly lie to someone if it makes them feel better, and why?",
+    "placeholder": "There's no wrong answer — we want your honest take...",
+    "required": true,
+    "rows": 4
+  },
+  {
+    "id": "wrong-conviction",
+    "section": 5,
+    "type": "textarea",
+    "label": "Describe a time you were completely convinced you were right about something, then turned out to be wrong. What changed your mind, and how long did it take?",
+    "placeholder": "Walk us through the situation...",
     "required": true,
     "rows": 5
   },
   {
-    "id": "favorite-late-night-snack",
-    "section": 3,
-    "type": "text",
-    "label": "What's your favorite late night snack?",
-    "placeholder": "e.g. instant ramen, chips, ice cream",
-    "required": true
+    "id": "need-to-be-liked",
+    "section": 5,
+    "type": "textarea",
+    "label": "Do you need people to like you? Why or why not?",
+    "placeholder": "Share your thoughts...",
+    "required": true,
+    "rows": 4
+  },
+  {
+    "id": "outside-friend-group",
+    "section": 5,
+    "type": "textarea",
+    "label": "What happens to the people outside a friend group?",
+    "placeholder": "What do you think?",
+    "required": true,
+    "rows": 4
+  },
+  {
+    "id": "scold-or-comfort",
+    "section": 5,
+    "type": "textarea",
+    "label": "When someone makes a mistake, when should you scold them and when should you comfort them?",
+    "placeholder": "How do you decide?",
+    "required": true,
+    "rows": 4
+  },
+  {
+    "id": "success-instinct",
+    "section": 5,
+    "type": "textarea",
+    "label": "When you do something well, what's your first instinct. What do you think that says about you?",
+    "placeholder": "Describe your reaction and what it might reveal...",
+    "required": true,
+    "rows": 4
   }
 ]
