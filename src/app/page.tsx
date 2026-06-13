@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import banner from "../../assets/banner.jpg";
 import icon from "../../assets/icon.webp";
 import JoinServerButton from "./JoinServerButton";
@@ -40,6 +41,16 @@ export default function Home() {
           </p>
 
           <JoinServerButton />
+
+          <p className="animate-fade-in-up animate-delay-3 mt-6 text-center text-xs text-[var(--discord-muted)]">
+            <Link href="/terms" className="hover:text-[var(--discord-text)]">
+              Terms
+            </Link>
+            {" · "}
+            <Link href="/privacy" className="hover:text-[var(--discord-text)]">
+              Privacy
+            </Link>
+          </p>
         </div>
       </div>
     </main>
