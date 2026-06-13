@@ -111,8 +111,8 @@
     "id": "white-lie",
     "section": 5,
     "type": "textarea",
-    "label": "Would you blatantly lie to someone if it makes them feel better, and why?",
-    "placeholder": "There's no wrong answer — we want your honest take...",
+    "label": "When is a time that blatantly lying to someone is justified?",
+    "placeholder": "We want your honest take...",
     "required": true,
     "rows": 4
   },
