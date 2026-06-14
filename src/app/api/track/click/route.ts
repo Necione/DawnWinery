@@ -59,6 +59,7 @@ export async function POST(request: Request) {
     clientUserAgent: clientUserAgent ?? null,
     eventSourceUrl: body.event_source_url ?? null,
     eventId,
+    discordUserId: null,
     createdAt: new Date(),
   });
 

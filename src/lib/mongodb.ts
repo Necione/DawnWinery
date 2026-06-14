@@ -101,6 +101,10 @@ export type AdClickRecord = {
   clientUserAgent?: string | null;
   eventSourceUrl?: string | null;
   eventId: string;
+  // Stamped by Paimon when it attributes the Discord join; null at click time
+  // since the website can't know who will join. Lets the bot later fire a
+  // deeper "ActivatedMember" conversion keyed by Discord ID.
+  discordUserId?: string | null;
   createdAt: Date;
 };
 
