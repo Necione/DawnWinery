@@ -4,6 +4,7 @@ export function ModerationScripts() {
   return (
     <>
       <Script src="/dashboard/custom-select.js" strategy="afterInteractive" />
+      <Script src="/dashboard/mobile-nav.js" strategy="afterInteractive" />
       <Script src="/dashboard/moderation.js" strategy="afterInteractive" />
     </>
   );

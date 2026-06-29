@@ -14,6 +14,7 @@ export function DashboardScripts({ mode }: { mode: "economy" }) {
         src="/dashboard/vendor/cytoscape-cola.js"
         strategy="afterInteractive"
       />
+      <Script src="/dashboard/mobile-nav.js" strategy="afterInteractive" />
       <Script src="/dashboard/app.js" strategy="afterInteractive" />
     </>
   );

@@ -5,8 +5,39 @@ export default function DashboardModerationPage() {
   return (
     <>
       <div id="app">
+        <input
+          type="checkbox"
+          id="nav-toggle"
+          className="nav-toggle"
+          aria-hidden="true"
+        />
+        <header className="mobile-bar">
+          <label
+            htmlFor="nav-toggle"
+            className="mobile-menu-btn"
+            aria-label="Toggle menu"
+          >
+            <span className="mobile-menu-icon" aria-hidden="true" />
+          </label>
+          <div className="mobile-bar-branding">
+            <span className="mobile-bar-title">Automod</span>
+            <span className="mobile-bar-sub">Moderation Dashboard</span>
+          </div>
+        </header>
+        <label
+          htmlFor="nav-toggle"
+          className="sidebar-backdrop"
+          aria-hidden="true"
+        />
         <aside id="sidebar">
           <div id="sidebar-header">
+            <label
+              htmlFor="nav-toggle"
+              className="mobile-menu-btn sidebar-close-btn"
+              aria-label="Close menu"
+            >
+              <span className="mobile-menu-icon" aria-hidden="true" />
+            </label>
             <div id="sidebar-branding">
               <span id="sidebar-title">Automod</span>
               <span id="sidebar-sub">Moderation Dashboard</span>
