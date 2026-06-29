@@ -137,6 +137,16 @@ function ensureAdClickIndexes(
   return adClickIndexesPromise;
 }
 
+export async function getProdDb() {
+  const clientPromise = getClientPromise();
+  if (!clientPromise) {
+    return null;
+  }
+
+  const client = await clientPromise;
+  return client.db(dbName);
+}
+
 export async function saveAdClick(record: AdClickRecord): Promise<boolean> {
   const clientPromise = getClientPromise();
   if (!clientPromise) return false;
