@@ -400,7 +400,7 @@ export async function getDashboardWallet(
     const chartToParam = parseDate(params.get("to"));
     const now = new Date();
     const today = startOfUtcDay(now);
-    const defaultChartFrom = addUtcDays(today, -89);
+    const defaultChartFrom = addUtcDays(today, -13);
 
     const chartFrom = chartFromParam
       ? startOfUtcDay(chartFromParam)
