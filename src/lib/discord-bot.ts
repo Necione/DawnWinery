@@ -10,6 +10,7 @@ import type { ServerUserStats } from "@/lib/mongodb";
 
 const DISCORD_API_BASE = "https://discord.com/api/v10";
 const DISCORD_BLURPLE = 0x5865f2;
+const DISCORD_RED = 0xed4245;
 const EMBED_FIELD_MAX = 1024;
 const PUBLIC_THREAD_TYPE = 11;
 
@@ -255,6 +256,85 @@ export async function postApplicationToDiscord({
   );
 
   await sendThreadMessages(thread.id, buildDetailEmbeds(answers));
+
+  return {
+    messageId: announcementMessage.id,
+    threadId: thread.id,
+  };
+}
+
+function sanitizeAppealThreadName(displayName: string) {
+  const sanitized = displayName.replace(/[^\w\s-]/g, "").trim() || "appellant";
+  return truncate(`Appeal - ${sanitized}`, 100);
+}
+
+export async function postAppealToDiscord({
+  channelId,
+  user,
+  reason,
+  serverStats,
+  clientIp,
+}: {
+  channelId: string;
+  user: DiscordUser;
+  reason: string;
+  serverStats: ServerUserStats;
+  clientIp: string | null;
+}) {
+  const displayName = getDiscordDisplayName(user);
+  const fields = buildApplicantFields(user, serverStats);
+
+  if (clientIp) {
+    fields.push({
+      name: "IP Address",
+      value: clientIp,
+      inline: true,
+    });
+  }
+
+  const announcementEmbed: DiscordEmbed = {
+    title: "New Ban Appeal Submitted",
+    description: `${displayName} submitted a ban appeal.`,
+    color: DISCORD_RED,
+    author: {
+      name: displayName,
+      icon_url: getDiscordAvatarUrl(user),
+    },
+    fields,
+    footer: {
+      text: "Ban Appeals",
+    },
+    timestamp: new Date().toISOString(),
+  };
+
+  const announcementMessage = await discordBotFetch<DiscordMessage>(
+    `/channels/${channelId}/messages`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        content: "⚖️ **New ban appeal received**",
+        embeds: [announcementEmbed],
+      }),
+    },
+  );
+
+  if (!announcementMessage.id) {
+    throw new Error("Failed to create the appeal announcement message.");
+  }
+
+  const thread = await createThreadFromMessage(
+    channelId,
+    announcementMessage.id,
+    sanitizeAppealThreadName(displayName),
+  );
+
+  await sendThreadMessages(thread.id, [
+    {
+      title: "Appeal Message",
+      color: DISCORD_RED,
+      description: truncate(reason, 4096),
+    },
+  ]);
 
   return {
     messageId: announcementMessage.id,
