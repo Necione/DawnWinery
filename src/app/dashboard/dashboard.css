@@ -535,6 +535,103 @@ button:hover {
   font-weight: 700;
 }
 
+/* Wallet panel */
+
+.wallet-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wallet-balance {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wallet-balance-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.wallet-balance-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.wallet-delta {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+}
+
+.wallet-delta-up {
+  color: var(--mint);
+}
+
+.wallet-delta-down {
+  color: var(--sink);
+}
+
+.wallet-delta-neutral {
+  color: var(--muted);
+}
+
+.wallet-chart-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.wallet-chart {
+  width: 100%;
+  height: 72px;
+  display: block;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--panel-2) 55%, var(--bg));
+}
+
+.wallet-chart-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 9px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.wallet-chart-empty {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.source-list li.source-item {
+  cursor: pointer;
+}
+
+.source-list li.source-empty {
+  cursor: default;
+  color: var(--muted);
+  font-size: 11px;
+  padding: 6px 8px;
+}
+
+.source-list li.source-empty::before {
+  content: none;
+}
+
 /* Rank lists */
 
 .rank-label {
@@ -705,7 +802,7 @@ button:hover {
   top: 12px;
   left: 12px;
   width: min(280px, calc(100% - 24px));
-  max-height: min(420px, calc(100% - 24px));
+  max-height: min(560px, calc(100% - 24px));
   background: color-mix(in srgb, var(--panel) 94%, transparent);
   backdrop-filter: blur(10px);
   border: 1px solid var(--border);

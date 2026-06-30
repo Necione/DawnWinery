@@ -131,12 +131,168 @@ function showUserError(err) {
 
   setHtml("top-senders", "");
   setHtml("top-receivers", "");
+  setHtml("source-list", "");
+  renderWallet(null);
   clearOverviewFocus();
   if (state.cy) {
     state.cy.destroy();
     state.cy = null;
   }
   hideDetail();
+}
+
+function fmtDelta(n) {
+  if (n == null || !Number.isFinite(Number(n))) return "—";
+  const value = Number(n);
+  if (value === 0) return "±0";
+  const sign = value > 0 ? "+" : "−";
+  return `${sign}${fmt(Math.abs(value))}`;
+}
+
+function deltaClass(n) {
+  if (n == null || !Number.isFinite(Number(n)) || Number(n) === 0) {
+    return "wallet-delta-neutral";
+  }
+  return Number(n) > 0 ? "wallet-delta-up" : "wallet-delta-down";
+}
+
+function renderSourceList(rows) {
+  const el = $("source-list");
+  if (!el) return;
+  el.innerHTML = "";
+  (rows || []).forEach((s) => {
+    const li = document.createElement("li");
+    li.className = "source-item";
+    li.innerHTML =
+      `<span class="name" title="${escapeHtml(s._id)}">${escapeHtml(s._id || "unknown")}</span>` +
+      `<span class="amt">${fmt(s.volume)}</span>`;
+    li.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const sourceSel = $("filter-source");
+      if (!sourceSel) return;
+      sourceSel.value = s._id;
+      sourceSel.dispatchEvent(new Event("change", { bubbles: true }));
+      refreshAll();
+    });
+    el.appendChild(li);
+  });
+  if (!rows || rows.length === 0) {
+    el.innerHTML = `<li class="source-empty">No sources in range.</li>`;
+  }
+}
+
+function renderWallet(data) {
+  const balanceEl = $("wallet-balance-value");
+  const deltaEl = $("wallet-delta");
+  const chart = $("wallet-chart");
+  const labelsEl = $("wallet-chart-labels");
+
+  if (!balanceEl || !deltaEl || !chart || !labelsEl) return;
+
+  if (!data) {
+    balanceEl.textContent = "—";
+    deltaEl.textContent = "vs yesterday: —";
+    deltaEl.className = "wallet-delta wallet-delta-neutral";
+    chart.innerHTML = "";
+    labelsEl.innerHTML = "";
+    return;
+  }
+
+  balanceEl.textContent =
+    data.balance == null ? "—" : `${fmtBalance(data.balance)} Mora`;
+
+  if (data.balance == null) {
+    deltaEl.textContent = "vs yesterday: —";
+    deltaEl.className = "wallet-delta wallet-delta-neutral";
+  } else {
+    deltaEl.textContent =
+      `vs yesterday: ${fmtDelta(data.todayDelta)}` +
+      (data.priorDayBalance == null
+        ? ""
+        : ` (${fmtBalance(data.priorDayBalance)} → ${fmtBalance(data.balance)})`);
+    deltaEl.className = `wallet-delta ${deltaClass(data.todayDelta)}`;
+  }
+
+  const points = (data.history || []).filter(
+    (row) => row.balance != null && Number.isFinite(row.balance),
+  );
+  if (points.length < 2) {
+    chart.innerHTML = "";
+    labelsEl.innerHTML =
+      points.length === 0
+        ? `<span class="wallet-chart-empty">Not enough history yet.</span>`
+        : `<span class="wallet-chart-empty">One day of data — check back tomorrow.</span>`;
+    return;
+  }
+
+  const width = 240;
+  const height = 72;
+  const padX = 4;
+  const padY = 6;
+  const values = points.map((p) => p.balance);
+  const minVal = Math.min(...values);
+  const maxVal = Math.max(...values);
+  const span = Math.max(1, maxVal - minVal);
+
+  const coords = points.map((point, index) => {
+    const x =
+      padX +
+      (index / Math.max(1, points.length - 1)) * (width - padX * 2);
+    const y =
+      height -
+      padY -
+      ((point.balance - minVal) / span) * (height - padY * 2);
+    return { x, y, point };
+  });
+
+  const line = coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
+  const area =
+    `${coords[0].x.toFixed(1)},${(height - padY).toFixed(1)} ` +
+    `${line} ` +
+    `${coords[coords.length - 1].x.toFixed(1)},${(height - padY).toFixed(1)}`;
+
+  chart.innerHTML =
+    `<defs>` +
+    `<linearGradient id="wallet-chart-fill" x1="0" y1="0" x2="0" y2="1">` +
+    `<stop offset="0%" stop-color="rgba(242,193,78,0.28)" />` +
+    `<stop offset="100%" stop-color="rgba(242,193,78,0.02)" />` +
+    `</linearGradient>` +
+    `</defs>` +
+    `<polygon points="${area}" fill="url(#wallet-chart-fill)" />` +
+    `<polyline points="${line}" fill="none" stroke="#f2c14e" stroke-width="1.6" vector-effect="non-scaling-stroke" />`;
+
+  const labelSlots = [
+    points[0],
+    points[Math.floor((points.length - 1) / 2)],
+    points[points.length - 1],
+  ];
+  labelsEl.innerHTML = labelSlots
+    .map((point) => {
+      const d = new Date(`${point.date}T00:00:00Z`);
+      const label = Number.isNaN(d.getTime())
+        ? point.date
+        : d.toLocaleDateString([], { month: "short", day: "numeric" });
+      return `<span>${escapeHtml(label)}</span>`;
+    })
+    .join("");
+}
+
+async function loadWallet(gen) {
+  const params = buildQuery();
+  params.delete("minAmount");
+  params.delete("showSystem");
+  params.delete("source");
+  params.delete("flow");
+
+  try {
+    const data = await fetchApi("/api/dashboard/wallet", params);
+    if (gen !== refreshGen || !isEconomyPage()) return;
+    renderWallet(data);
+  } catch (err) {
+    if (gen !== refreshGen || !isEconomyPage()) return;
+    if (!isUserFacingError(err)) console.error(err);
+    renderWallet(null);
+  }
 }
 
 async function loadStats(gen) {
@@ -170,6 +326,8 @@ async function loadStats(gen) {
     sourceSel.appendChild(opt);
   });
   sourceSel.value = current;
+
+  renderSourceList(data.bySource || []);
 
   const renderRank = (el, rows, direction) => {
     if (!el) return;
@@ -630,7 +788,15 @@ function nodeLabelFromId(id) {
   return n.data("fullLabel") || n.data("label") || id;
 }
 
+function fmtBalance(value) {
+  if (value == null || !Number.isFinite(Number(value))) return "—";
+  return fmt(value);
+}
+
 function openNodeDetail(nodeId, label, meta) {
+  const nodeType =
+    meta?.type ?? (nodeId === "__treasury__" ? "treasury" : null);
+
   let body = `<div class="detail-summary">`;
   body += `<div class="detail-stat"><span class="detail-stat-label">Node</span><span class="detail-stat-value">${escapeHtml(label)}</span></div>`;
   if (meta) {
@@ -642,6 +808,17 @@ function openNodeDetail(nodeId, label, meta) {
       body += `<div class="detail-stat detail-stat-wide"><span class="detail-stat-label">Discord ID</span><span class="detail-stat-value"><code>${escapeHtml(meta.discordId)}</code></span></div>`;
     }
   }
+  if (nodeType === "user") {
+    body +=
+      `<div class="detail-stat"><span class="detail-stat-label">Balance</span>` +
+      `<span class="detail-stat-value detail-balance-pending">…</span></div>` +
+      `<div class="detail-stat"><span class="detail-stat-label">Treasury</span>` +
+      `<span class="detail-stat-value detail-treasury-pending">…</span></div>`;
+  } else if (nodeType === "treasury") {
+    body +=
+      `<div class="detail-stat"><span class="detail-stat-label">Total treasury</span>` +
+      `<span class="detail-stat-value detail-treasury-pending">…</span></div>`;
+  }
   body += `</div>`;
   state.detail = {
     kind: "node",
@@ -650,8 +827,55 @@ function openNodeDetail(nodeId, label, meta) {
     body,
     skip: 0,
     total: 0,
+    nodeType,
   };
-  loadTransactions(true);
+  void (async () => {
+    await loadTransactions(true);
+    await loadNodeBalance(nodeId, nodeType);
+  })();
+}
+
+async function loadNodeBalance(nodeId, nodeType) {
+  if (nodeType !== "user" && nodeType !== "treasury") return;
+
+  const params = buildQuery();
+  params.set("nodeId", nodeId);
+
+  try {
+    const data = await fetchApi("/api/dashboard/balance", params);
+    if (!state.detail || state.detail.params?.nodeId !== nodeId) return;
+
+    const summary = document.querySelector("#detail-body .detail-summary");
+    if (!summary) return;
+
+    const balanceEl = summary.querySelector(".detail-balance-pending");
+    const treasuryEl = summary.querySelector(".detail-treasury-pending");
+    if (data.type === "user") {
+      if (balanceEl) {
+        balanceEl.classList.remove("detail-balance-pending");
+        balanceEl.textContent = fmtBalance(data.balance);
+        balanceEl.classList.add("amt");
+      }
+      if (treasuryEl) {
+        treasuryEl.classList.remove("detail-treasury-pending");
+        treasuryEl.textContent = fmtBalance(data.treasury);
+        treasuryEl.classList.add("amt");
+      }
+    } else if (data.type === "treasury" && treasuryEl) {
+      treasuryEl.classList.remove("detail-treasury-pending");
+      treasuryEl.textContent = fmtBalance(data.treasury);
+      treasuryEl.classList.add("amt");
+    }
+  } catch (err) {
+    if (!isUserFacingError(err)) console.error(err);
+    if (!state.detail || state.detail.params?.nodeId !== nodeId) return;
+    document
+      .querySelectorAll(".detail-balance-pending, .detail-treasury-pending")
+      .forEach((el) => {
+        el.classList.remove("detail-balance-pending", "detail-treasury-pending");
+        el.textContent = "—";
+      });
+  }
 }
 
 function openEdgeDetail(source, target, d) {
@@ -757,7 +981,7 @@ async function refreshAll() {
   clearOverviewFocus();
   hideDetail();
   try {
-    await Promise.all([loadStats(gen), loadGraph(gen)]);
+    await Promise.all([loadStats(gen), loadGraph(gen), loadWallet(gen)]);
   } catch (err) {
     if (gen !== refreshGen) return;
     if (!isUserFacingError(err)) console.error(err);

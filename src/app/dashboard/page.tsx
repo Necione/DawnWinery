@@ -128,9 +128,32 @@ export default function DashboardPage() {
               />
             </div>
             <div className="overview-body">
+              <div id="wallet-panel" className="wallet-panel">
+                <div id="wallet-balance" className="wallet-balance">
+                  <span className="wallet-balance-label">Balance</span>
+                  <span id="wallet-balance-value" className="wallet-balance-value">
+                    —
+                  </span>
+                </div>
+                <div id="wallet-delta" className="wallet-delta">
+                  vs yesterday: —
+                </div>
+                <div id="wallet-chart-wrap" className="wallet-chart-wrap">
+                  <svg
+                    id="wallet-chart"
+                    className="wallet-chart"
+                    viewBox="0 0 240 72"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                  />
+                  <div id="wallet-chart-labels" className="wallet-chart-labels" />
+                </div>
+              </div>
               <div id="stats-totals" className="stats-box">
                 No user selected.
               </div>
+              <p className="rank-label">Sources</p>
+              <ol id="source-list" className="ranklist source-list" />
               <p className="rank-label">Sent to</p>
               <ol id="top-senders" className="ranklist" />
               <p className="rank-label">Received from</p>

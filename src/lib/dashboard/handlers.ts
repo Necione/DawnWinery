@@ -278,6 +278,290 @@ async function requireResolvedUser(
   return resolved;
 }
 
+async function readUserEconomyBalances(
+  db: Db,
+  discordId: string,
+): Promise<{ balance: number | null; treasury: number | null }> {
+  const rows = await db
+    .collection(COLLECTIONS.users)
+    .aggregate<{ balance?: number; treasury?: number }>([
+      { $match: { discordId } },
+      {
+        $project: {
+          balance: "$mora",
+          treasury: {
+            $sum: {
+              $map: {
+                input: { $ifNull: ["$treasuryLots", []] },
+                as: "lot",
+                in: "$$lot.amount",
+              },
+            },
+          },
+        },
+      },
+    ])
+    .toArray();
+
+  const row = rows[0];
+  if (!row) return { balance: null, treasury: null };
+  return {
+    balance: typeof row.balance === "number" ? row.balance : null,
+    treasury: typeof row.treasury === "number" ? row.treasury : 0,
+  };
+}
+
+async function readTotalTreasuryBalance(db: Db): Promise<number> {
+  const rows = await db
+    .collection(COLLECTIONS.users)
+    .aggregate<{ total: number }>([
+      { $unwind: { path: "$treasuryLots", preserveNullAndEmptyArrays: false } },
+      { $group: { _id: null, total: { $sum: "$treasuryLots.amount" } } },
+    ])
+    .toArray();
+  return rows[0]?.total ?? 0;
+}
+
+function decodeNodeId(key: string): {
+  id: string | null;
+  type: NodeType | null;
+} {
+  if (key === "__mint__") return { id: null, type: "mint" };
+  if (key === "__sink__") return { id: null, type: "sink" };
+  if (key === "__house__") return { id: null, type: "house" };
+  if (key === "__treasury__") return { id: null, type: "treasury" };
+  if (key.startsWith("c:")) return { id: key.slice(2), type: "club" };
+  if (key.startsWith("u:")) return { id: key.slice(2), type: "user" };
+  return { id: key, type: "user" };
+}
+
+function utcDayKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function startOfUtcDay(date: Date): Date {
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
+}
+
+function addUtcDays(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d;
+}
+
+function enumerateUtcDays(from: Date, to: Date): string[] {
+  const days: string[] = [];
+  let cursor = startOfUtcDay(from);
+  const end = startOfUtcDay(to);
+  while (cursor.getTime() <= end.getTime()) {
+    days.push(utcDayKey(cursor));
+    cursor = addUtcDays(cursor, 1);
+  }
+  return days;
+}
+
+function userNetDeltaExpression(discordId: string) {
+  return {
+    $cond: [
+      {
+        $and: [{ $eq: ["$toId", discordId] }, { $eq: ["$toType", "user"] }],
+      },
+      "$amount",
+      {
+        $cond: [
+          {
+            $and: [
+              { $eq: ["$fromId", discordId] },
+              { $eq: ["$fromType", "user"] },
+            ],
+          },
+          { $multiply: ["$amount", -1] },
+          0,
+        ],
+      },
+    ],
+  };
+}
+
+export async function getDashboardWallet(
+  params: URLSearchParams,
+): Promise<DashboardResult<unknown>> {
+  const db = await getProdDb();
+  if (!db) return dbUnavailable();
+
+  try {
+    const user = await requireResolvedUser(db, params);
+    const discordId = user.discordId;
+    const collection = db.collection(COLLECTIONS.economyLogs);
+
+    const chartFromParam = parseDate(params.get("from"));
+    const chartToParam = parseDate(params.get("to"));
+    const now = new Date();
+    const today = startOfUtcDay(now);
+    const defaultChartFrom = addUtcDays(today, -89);
+
+    const chartFrom = chartFromParam
+      ? startOfUtcDay(chartFromParam)
+      : defaultChartFrom;
+    const chartTo = chartToParam ? startOfUtcDay(chartToParam) : today;
+
+    const [balances, dailyRows, todayRows, afterChartRows] = await Promise.all([
+      readUserEconomyBalances(db, discordId),
+      collection
+        .aggregate<{ _id: string; delta: number }>([
+          {
+            $match: {
+              ...withUserScope({}, discordId),
+              at: { $gte: chartFrom, $lte: addUtcDays(chartTo, 1) },
+            },
+          },
+          { $addFields: { delta: userNetDeltaExpression(discordId) } },
+          {
+            $group: {
+              _id: {
+                $dateToString: { format: "%Y-%m-%d", date: "$at", timezone: "UTC" },
+              },
+              delta: { $sum: "$delta" },
+            },
+          },
+          { $sort: { _id: 1 } },
+        ])
+        .toArray(),
+      collection
+        .aggregate<{ delta: number }>([
+          {
+            $match: {
+              ...withUserScope({}, discordId),
+              at: { $gte: today },
+            },
+          },
+          { $addFields: { delta: userNetDeltaExpression(discordId) } },
+          { $group: { _id: null, delta: { $sum: "$delta" } } },
+        ])
+        .toArray(),
+      chartTo.getTime() < today.getTime()
+        ? collection
+            .aggregate<{ delta: number }>([
+              {
+                $match: {
+                  ...withUserScope({}, discordId),
+                  at: { $gt: addUtcDays(chartTo, 1) },
+                },
+              },
+              { $addFields: { delta: userNetDeltaExpression(discordId) } },
+              { $group: { _id: null, delta: { $sum: "$delta" } } },
+            ])
+            .toArray()
+        : Promise.resolve([]),
+    ]);
+
+    const deltaByDay = new Map<string, number>();
+    for (const row of dailyRows) {
+      deltaByDay.set(row._id, row.delta);
+    }
+
+    const todayDelta = todayRows[0]?.delta ?? 0;
+    const currentBalance = balances.balance;
+    const priorDayBalance =
+      currentBalance == null ? null : currentBalance - todayDelta;
+    const deltaAfterChart = afterChartRows[0]?.delta ?? 0;
+    const anchorBalance =
+      currentBalance == null ? null : currentBalance - deltaAfterChart;
+
+    const dayKeys = enumerateUtcDays(chartFrom, chartTo);
+    const history: { date: string; balance: number | null; delta: number }[] =
+      [];
+
+    if (anchorBalance != null) {
+      let running = anchorBalance;
+      for (let i = dayKeys.length - 1; i >= 0; i--) {
+        const date = dayKeys[i]!;
+        const delta = deltaByDay.get(date) ?? 0;
+        history.unshift({ date, balance: running, delta });
+        running -= delta;
+      }
+    } else {
+      for (const date of dayKeys) {
+        history.push({
+          date,
+          balance: null,
+          delta: deltaByDay.get(date) ?? 0,
+        });
+      }
+    }
+
+    return {
+      ok: true,
+      data: {
+        user: { discordId: user.discordId, label: user.label },
+        balance: currentBalance,
+        treasury: balances.treasury,
+        todayDelta,
+        priorDayBalance,
+        history,
+      },
+    };
+  } catch (err) {
+    if (isDashboardError(err)) return err;
+    throw err;
+  }
+}
+
+export async function getDashboardNodeBalance(
+  params: URLSearchParams,
+): Promise<DashboardResult<unknown>> {
+  const db = await getProdDb();
+  if (!db) return dbUnavailable();
+
+  const nodeId = params.get("nodeId")?.trim() ?? "";
+  if (!nodeId) {
+    return {
+      ok: false,
+      status: 400,
+      body: { error: "missing_nodeId" },
+    };
+  }
+
+  const { id, type } = decodeNodeId(nodeId);
+  if (type === "user" && id) {
+    const balances = await readUserEconomyBalances(db, id);
+    return {
+      ok: true,
+      data: {
+        nodeId,
+        type,
+        discordId: id,
+        balance: balances.balance,
+        treasury: balances.treasury,
+      },
+    };
+  }
+
+  if (type === "treasury") {
+    return {
+      ok: true,
+      data: {
+        nodeId,
+        type,
+        balance: null,
+        treasury: await readTotalTreasuryBalance(db),
+      },
+    };
+  }
+
+  return {
+    ok: true,
+    data: {
+      nodeId,
+      type,
+      balance: null,
+      treasury: null,
+    },
+  };
+}
+
 function counterpartyNodeId(
   id: string | null,
   type: NodeType,
